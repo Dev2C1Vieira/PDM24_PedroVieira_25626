@@ -51,8 +51,7 @@ fun Calculator() {
     val maxLength = 15
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         // Here is the calculator structure
         Box(
@@ -60,18 +59,15 @@ fun Calculator() {
                 .size(300.dp, 500.dp)
                 .align(Alignment.Center)
                 .background(Color(0xFF767676))
-                .clip(RoundedCornerShape(20.dp))
-                .border(2.dp, Color.Black, RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(25.dp))
+                .border(3.dp, Color.Black, RoundedCornerShape(25.dp))
         ) {
             // Content of the calculator (eg: Buttons, Screen, etc)
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Spacer(modifier = Modifier.height(16.dp))
-                Spacer(modifier = Modifier.height(16.dp))
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(64.dp))
                 CalculatorScreen(displayText = displayText)
                 CallButtons(onButtonClick = { buttonText ->
                     when (buttonText) {
@@ -237,7 +233,7 @@ fun CalculatorScreen(displayText: String) {
             .height(70.dp)
             .background(Color(0xFFbbc7b5))
             .clip(RoundedCornerShape(10.dp))
-            .border(5.dp, Color.Black, RoundedCornerShape(10.dp))
+            .border(3.dp, Color.Black, RoundedCornerShape(10.dp))
             .padding(8.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
