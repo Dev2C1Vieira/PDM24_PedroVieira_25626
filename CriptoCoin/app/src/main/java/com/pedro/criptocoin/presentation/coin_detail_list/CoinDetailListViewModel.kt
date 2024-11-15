@@ -1,29 +1,27 @@
-package com.pedro.criptocoin.presentation.coin_list
+package com.pedro.criptocoin.presentation.coin_detail_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pedro.criptocoin.data.remote.api.RetrofitInstance
 import com.pedro.criptocoin.data.repository.CoinRepositoryImpl
-import com.pedro.criptocoin.domain.model.Coin
 import com.pedro.criptocoin.domain.model.CoinDetail
 import com.pedro.criptocoin.domain.use_case.GetCoinDetailUseCase
-import com.pedro.criptocoin.domain.use_case.GetCoinsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-class CoinListViewModel : ViewModel() {
+class CoinDetailViewModel : ViewModel() {
     private val api = RetrofitInstance.api
     private val repository = CoinRepositoryImpl(api)
-    private val getCoinsUseCase = GetCoinsUseCase(repository)
+    private val getCoinDetailUseCase = GetCoinDetailUseCase(repository)
 
-    val coins = MutableStateFlow<List<Coin>>(emptyList())
+    val coinDetail = MutableStateFlow<CoinDetail?>(null)
 
-    fun fetchCoins() {
+    fun fetchCoins(coinId: String) {
         viewModelScope.launch {
             try {
-                coins.value = getCoinsUseCase()
+                coinDetail.value = getCoinDetailUseCase(coinId)
             } catch (e: Exception) {
-                coins.value = emptyList()
+                coinDetail.value = null
             }
         }
     }
