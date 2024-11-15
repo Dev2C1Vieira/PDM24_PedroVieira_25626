@@ -3,45 +3,36 @@ package com.pedro.criptocoin
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.pedro.criptocoin.ui.theme.CriptoCoinTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import com.pedro.criptocoin.presentation.coin_list.CoinDetailViewModel
+import com.pedro.criptocoin.presentation.coin_list.CoinListScreen
+import com.pedro.criptocoin.presentation.coin_list.CoinListViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
-            CriptoCoinTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+            MainScreen()
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun MainScreen() {
+    val selectedCoinId by remember { mutableStateOf<String?>(null) }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CriptoCoinTheme {
-        Greeting("Android")
+    if (selectedCoinId == null) {
+        val coinListViewModel: CoinListViewModel = viewModel()
+        CoinListScreen(coinListViewModel) {
+                coinId -> selectedCoinId = coinId
+        }
+    } else {
+        val coinDetailViewModel: CoinDetailViewModel = viewModel()
+        CoinDetailListScreen(coinDetailViewModel, selectedCoinId!!) {
+            selectedCoinId = null
+        }
     }
 }
