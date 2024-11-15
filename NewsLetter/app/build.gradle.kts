@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.pedro.newsletter"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.pedro.newsletter"
@@ -41,6 +41,8 @@ android {
 
 dependencies {
 
+    implementation(libs.retrofit)
+    implementation(libs.gson)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
