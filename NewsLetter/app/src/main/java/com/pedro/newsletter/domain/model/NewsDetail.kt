@@ -1,7 +1,8 @@
 package com.pedro.newsletter.domain.model
 
-data class NewsDetail (
-    val id: String,
-    val name: String,
-    val description: String
+// The NewsDetail class will be used to display the details of a specific article.
+data class NewsDetail(
+    val updatedDate: String,            // Date when the article was last updated
+    val createdDate: String,            // Date when the article was created
+    val publishedDate: String,          // Date when the article was published
 )

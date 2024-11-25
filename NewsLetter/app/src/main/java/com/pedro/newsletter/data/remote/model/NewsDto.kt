@@ -2,17 +2,25 @@ package com.pedro.newsletter.data.remote.model
 
 import com.pedro.newsletter.domain.model.News
 
-data class NewsDto (
+data class NewsDto(
+    val section: String,
+    val subsection: String?,
     val title: String,
-    val abstract: String,
+    val abstract: String,       // Same as summary
     val url: String,
-    val multimedia: List<MultimediaDto>?
-)
-
-fun NewsDto.toDomain(): News {
-    return News(
-        title = this.title,
-        summary = this.abstract,
-        url = this.url
-    )
+    val byline: String          // Same as author
+) {
+    fun toDomain(): News {
+        return News(
+            section = this.section,
+            subsection = this.subsection ?: "",
+            title = this.title,
+            summary = this.abstract,
+            url = this.url,
+            author = this.byline
+        )
+    }
 }
+
+
+

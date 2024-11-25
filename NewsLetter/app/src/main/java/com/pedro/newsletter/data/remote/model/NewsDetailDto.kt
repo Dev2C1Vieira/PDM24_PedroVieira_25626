@@ -3,11 +3,15 @@ package com.pedro.newsletter.data.remote.model
 import com.pedro.newsletter.domain.model.NewsDetail
 
 data class NewsDetailDto (
-    val id: String,
-    val name: String,
-    val description: String
+    val updated_date: String,
+    val created_date: String,
+    val published_date: String,
 ) {
-    fun toNewsDetail(): NewsDetail {
-        return NewsDetail(id = id, name = name, description = description)
+    fun toDomain(): NewsDetail {
+        return NewsDetail(
+            updatedDate = this.updated_date,
+            createdDate = this.created_date,
+            publishedDate = this.published_date,
+        )
     }
 }
