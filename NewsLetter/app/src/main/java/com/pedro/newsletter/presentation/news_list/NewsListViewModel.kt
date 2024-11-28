@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class NewsListViewModel(/* section: String */) : ViewModel() {
+class NewsListViewModel : ViewModel() {
 
     private val api = RetrofitInstance.api
     private val repository = NewsRepositoryImpl(api)

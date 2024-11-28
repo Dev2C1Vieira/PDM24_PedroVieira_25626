@@ -9,6 +9,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pedro.newsletter.presentation.news_detail.NewsDetailListScreen
+import com.pedro.newsletter.presentation.news_detail.NewsDetailListViewModel
 import com.pedro.newsletter.presentation.news_list.NewsListScreen
 import com.pedro.newsletter.presentation.news_list.NewsListViewModel
 import com.pedro.newsletter.ui.theme.NewsLetterTheme
@@ -34,12 +36,12 @@ fun NewsAppearanceBox() {
         NewsListScreen(viewModel = newsListViewModel) { newsURL ->
             selectedNewsURL = newsURL
         }
-    } /*else {
+    } else {
         println("Welcome there ${selectedNewsURL}")
 
         val newsDetailListViewModel: NewsDetailListViewModel = viewModel()
-        NewsDetailList(viewModel = articleDetailViewModel, articleId = selectedArticleId!!) {
-            selectedArticleId = null
+        NewsDetailListScreen(viewModel = newsDetailListViewModel, newsURL = selectedNewsURL!!) {
+            selectedNewsURL = null
         }
-    }*/
+    }
 }
