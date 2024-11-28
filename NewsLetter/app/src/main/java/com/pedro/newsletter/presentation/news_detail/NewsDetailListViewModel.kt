@@ -4,31 +4,30 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.pedro.newsletter.data.remote.api.RetrofitInstance
+import com.pedro.newsletter.data.repository.NewsRepositoryImpl
+import com.pedro.newsletter.domain.model.News
 import com.pedro.newsletter.domain.model.NewsDetail
 import com.pedro.newsletter.domain.use_case.GetNewsDetailUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-class NewsDetailListViewModel(private val getNewsDetailUseCase: GetNewsDetailUseCase) : ViewModel() {
+class NewsDetailListViewModel : ViewModel() {
 
-    private val _newsDetail = MutableLiveData<NewsDetail>()
-    val newsDetail: LiveData<NewsDetail> get() = _newsDetail
+    private val api = RetrofitInstance.api
+    private val repository = NewsRepositoryImpl(api)
+    private val getNewsDetailUseCase = GetNewsDetailUseCase(repository)
 
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> get() = _isLoading
 
-    private val _errorMessage = MutableLiveData<String>()
-    val errorMessage: LiveData<String> get() = _errorMessage
+    private val _newsDetail = MutableStateFlow<News?>(null)
+    val newsDetail = _newsDetail
 
-    fun fetchNewsDetail(newsId: String, apiKey: String) {
-        _isLoading.value = true
+    fun fetchNewsDetail(/* section: String, */ newsURL: String) {
         viewModelScope.launch {
             try {
-                val newsDetail = getNewsDetailUseCase(newsId, apiKey)
-                _newsDetail.value = newsDetail
-                _isLoading.value = false
+                _newsDetail.value = getNewsDetailUseCase(/* section, */ newsURL)
             } catch (e: Exception) {
-                _errorMessage.value = "Erro ao carregar detalhes da notícia: ${e.message}"
-                _isLoading.value = false
+                _newsDetail.value = null
             }
         }
     }

@@ -5,7 +5,7 @@ import com.pedro.newsletter.domain.repository.NewsRepository
 
 class GetNewsUseCase(private val repository: NewsRepository) {
 
-    suspend operator fun invoke(section: String, apiKey: String): List<News> {
-        return repository.getNews(section, apiKey)
+    suspend operator fun invoke(/* section: String */): List<News> {
+        return repository.getNews(/* section */)
     }
 }

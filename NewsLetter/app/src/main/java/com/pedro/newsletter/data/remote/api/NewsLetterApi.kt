@@ -1,6 +1,5 @@
 package com.pedro.newsletter.data.remote.api
 
-import com.pedro.newsletter.data.remote.model.NewsDetailDto
 import com.pedro.newsletter.data.remote.model.NewsResponseDto
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -11,7 +10,7 @@ import retrofit2.http.Query
 object RetrofitInstance {
     val api: NewsLetterApi by lazy {
         Retrofit.Builder()
-            .baseUrl("https://api.nytimes.com/svc/topstories/v2/")
+            .baseUrl("https://api.nytimes.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(NewsLetterApi::class.java)
@@ -19,16 +18,11 @@ object RetrofitInstance {
 }
 
 interface NewsLetterApi {
-    @GET("{section}.json")
+    @GET("svc/topstories/v2/home.json?api-key=tezVdUAAMHtPEnpawEK75JqBLlbOQGeC")
+    suspend fun getTopStories(): NewsResponseDto
+
+    /* @GET("svc/topstories/v2/{section}.json?api-key=tezVdUAAMHtPEnpawEK75JqBLlbOQGeC")
     suspend fun getTopStories(
-        @Path("section") section: String,
-        @Query("api-key") apiKey: String
-    ): NewsResponseDto
-
-
-    @GET("article/{newsId}.json")
-    suspend fun getNewsDetail(
-        @Path("newsId") newsId: String,
-        @Query("api-key") apiKey: String
-    ): NewsDetailDto
+        @Path("section") section: String
+    ): NewsResponseDto */
 }
