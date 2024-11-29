@@ -19,15 +19,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.pedro.newsletter.presentation.shared.SharedViewModel
 
 @Composable
 fun NewsDetailListScreen(
     viewModel: NewsDetailListViewModel,
     newsURL: String,
+    sharedViewModel: SharedViewModel, // Recebendo o ViewModel compartilhado
     onBack: () -> Unit
 ) {
+    val selectedCategory = sharedViewModel.selectedCategory // Acessando a categoria atual
+
     LaunchedEffect(newsURL) {
-        viewModel.fetchNewsDetail(newsURL)
+        viewModel.fetchNewsDetail(sharedViewModel.selectedCategory, newsURL)
     }
 
     val newsDetail = viewModel.newsDetail.collectAsState()
@@ -74,6 +78,11 @@ fun NewsDetailListScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
+                    text = "Category: $selectedCategory", // Exibindo a categoria na tela de detalhes
+                    style = TextStyle(fontSize = 14.sp, color = Color.Gray),
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
                     text = "Created On ${news.createdDate}",
                     style = TextStyle(fontSize = 14.sp, color = Color.Gray),
                     modifier = Modifier.padding(bottom = 4.dp)
@@ -95,7 +104,7 @@ fun NewsDetailListScreen(
                 )
             }
 
-            // Resumo da notícia (com um pouco mais de espaçamento)
+            // Resumo da notícia
             BasicText(
                 text = news.summary,
                 style = TextStyle(

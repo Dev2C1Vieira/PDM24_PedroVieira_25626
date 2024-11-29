@@ -6,9 +6,9 @@ import com.pedro.newsletter.domain.repository.NewsRepository
 
 class NewsRepositoryImpl(private val api: NewsLetterApi) : NewsRepository {
 
-    override suspend fun getNews(/* section: String */): List<News> {
+    override suspend fun getNews(section: String ): List<News> {
         try {
-            val response = api.getTopStories(/* section */)
+            val response = api.getTopStories( section )
 
             return response.results.map { it.toDomain() }.take(10)
         } catch (e: Exception) {

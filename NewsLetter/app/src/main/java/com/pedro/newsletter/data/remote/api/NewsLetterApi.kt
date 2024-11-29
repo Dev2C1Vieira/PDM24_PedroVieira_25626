@@ -18,11 +18,11 @@ object RetrofitInstance {
 }
 
 interface NewsLetterApi {
-    @GET("svc/topstories/v2/home.json?api-key=tezVdUAAMHtPEnpawEK75JqBLlbOQGeC")
-    suspend fun getTopStories(): NewsResponseDto
+    /*@GET("svc/topstories/v2/home.json?api-key=tezVdUAAMHtPEnpawEK75JqBLlbOQGeC")
+    suspend fun getTopStories(): NewsResponseDto*/
 
-    /* @GET("svc/topstories/v2/{section}.json?api-key=tezVdUAAMHtPEnpawEK75JqBLlbOQGeC")
+     @GET("svc/topstories/v2/{section}.json?api-key=tezVdUAAMHtPEnpawEK75JqBLlbOQGeC")
     suspend fun getTopStories(
         @Path("section") section: String
-    ): NewsResponseDto */
+    ): NewsResponseDto
 }

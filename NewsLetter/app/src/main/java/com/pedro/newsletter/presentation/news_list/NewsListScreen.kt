@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,64 +35,77 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.pedro.newsletter.domain.model.News
+import com.pedro.newsletter.presentation.shared.SharedViewModel
 
 @Composable
-fun NewsListScreen(viewModel: NewsListViewModel, onNewsSelected: (String) -> Unit) {
-
+fun NewsListScreen(
+    viewModel: NewsListViewModel,
+    sharedViewModel: SharedViewModel,
+    onNewsSelected: (String) -> Unit
+) {
     val news by viewModel.news.collectAsState()
-    val selectedCategory = remember { mutableStateOf("home") } // Inicializa com o valor de "Geral" (home)
-    val categoryMapping = mapOf(
-        "Geral" to "home",
-        "Artes" to "arts",
-        "Automóveis" to "automobiles",
-        "Negócios" to "business",
-        "Viagens" to "travel"
-    )
+    val isLoading by viewModel.isLoading.collectAsState() // Pegando o estado de carregamento
+    val selectedCategory = sharedViewModel.selectedCategory // Observando a categoria selecionada
+
+    // Aciona a chamada à API sempre que a categoria mudar
+    LaunchedEffect(selectedCategory) {
+        viewModel.fetchNews(selectedCategory) // Chama a função da ViewModel passando a categoria selecionada
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Navbar
-        Navbar(selectedCategory.value) { category ->
-            selectedCategory.value = categoryMapping[category] ?: "home" // Atualiza o valor associado à categoria selecionada
+        Navbar(selectedCategory) { category ->
+            // Atualiza a categoria selecionada no SharedViewModel
+            sharedViewModel.selectedCategory = category
         }
 
         // Corpo da tela com as notícias
-        if (news.isEmpty()) {
-            Text("Loading news...")
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+        } else if (news.isEmpty()) {
+            Text("No news available", modifier = Modifier.align(Alignment.CenterHorizontally))
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(news) { news ->
-                    NewsListItem(news = news, onClick = { onNewsSelected(news.url) })
+                items(news) { newsItem ->
+                    NewsListItem(news = newsItem, onClick = { onNewsSelected(newsItem.url) })
                 }
             }
         }
     }
 }
 
+
 @Composable
-fun Navbar(selectedCategory: String, onCategorySelected: (String) -> Unit) {
+fun Navbar(
+    selectedCategory: String,
+    onCategorySelected: (String) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .height(56.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly, // Distribui os itens igualmente
+        horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
         val categories = listOf("Geral", "Artes", "Automóveis", "Negócios", "Viagens")
 
         categories.forEach { category ->
-            var isHovered by remember { mutableStateOf(false) } // Estado para hover
+            var isHovered by remember { mutableStateOf(false) }
 
             Text(
                 text = category,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = if (selectedCategory == category) FontWeight.Bold else FontWeight.Normal, // Altera o peso da fonte para o item selecionado
-                    fontSize = 14.sp // Ajustando o tamanho da fonte para caber melhor
+                    fontWeight = if (selectedCategory == category) FontWeight.Bold else FontWeight.Normal,
+                    fontSize = 14.sp
                 ),
                 color = if (selectedCategory == category) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
-                    .padding(horizontal = 8.dp) // Ajustando o espaçamento para otimizar o layout
-                    .clickable { onCategorySelected(category) } // Atualiza a categoria selecionada
+                    .padding(horizontal = 8.dp)
+                    .clickable {
+                        // Atualiza a categoria selecionada
+                        onCategorySelected(category)
+                    }
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onPress = {

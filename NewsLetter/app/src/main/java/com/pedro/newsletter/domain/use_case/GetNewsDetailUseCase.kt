@@ -5,9 +5,9 @@ import com.pedro.newsletter.domain.repository.NewsRepository
 
 class GetNewsDetailUseCase(private val repository: NewsRepository) {
 
-    suspend operator fun invoke(/* section: String, */ newsURL: String): News? {
+    suspend operator fun invoke(section: String, newsURL: String): News? {
 
-        val news = repository.getNews(/* section */)
+        val news = repository.getNews(section)
 
         return news.find { it.url == newsURL }
     }

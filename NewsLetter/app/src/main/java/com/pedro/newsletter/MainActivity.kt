@@ -13,6 +13,7 @@ import com.pedro.newsletter.presentation.news_detail.NewsDetailListScreen
 import com.pedro.newsletter.presentation.news_detail.NewsDetailListViewModel
 import com.pedro.newsletter.presentation.news_list.NewsListScreen
 import com.pedro.newsletter.presentation.news_list.NewsListViewModel
+import com.pedro.newsletter.presentation.shared.SharedViewModel
 import com.pedro.newsletter.ui.theme.NewsLetterTheme
 
 class MainActivity : ComponentActivity() {
@@ -29,19 +30,31 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun NewsAppearanceBox() {
+    // Instanciando o SharedViewModel
+    val sharedViewModel: SharedViewModel = viewModel()
+
     var selectedNewsURL by remember { mutableStateOf<String?>(null) }
 
     if (selectedNewsURL == null) {
+        // Passando o SharedViewModel para NewsListScreen
         val newsListViewModel: NewsListViewModel = viewModel()
-        NewsListScreen(viewModel = newsListViewModel) { newsURL ->
-            selectedNewsURL = newsURL
-        }
+        NewsListScreen(
+            viewModel = newsListViewModel,
+            sharedViewModel = sharedViewModel, // Passando o SharedViewModel
+            onNewsSelected = { newsURL ->
+                selectedNewsURL = newsURL
+            }
+        )
     } else {
-        println("Welcome there ${selectedNewsURL}")
-
+        // Passando o SharedViewModel para NewsDetailListScreen
         val newsDetailListViewModel: NewsDetailListViewModel = viewModel()
-        NewsDetailListScreen(viewModel = newsDetailListViewModel, newsURL = selectedNewsURL!!) {
-            selectedNewsURL = null
-        }
+        NewsDetailListScreen(
+            viewModel = newsDetailListViewModel,
+            newsURL = selectedNewsURL!!,
+            sharedViewModel = sharedViewModel, // Passando o SharedViewModel
+            onBack = {
+                selectedNewsURL = null
+            }
+        )
     }
 }
