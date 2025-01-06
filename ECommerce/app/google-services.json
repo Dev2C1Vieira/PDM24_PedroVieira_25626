@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "702486805324",
+    "project_id": "ecommerceshared-543ea",
+    "storage_bucket": "ecommerceshared-543ea.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:702486805324:android:77d068b8063d2a0fbf6de9",
+        "android_client_info": {
+          "package_name": "com.pedro.ecommerce"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGwRAYxNhgpv-kqm5J5v1fvSV7uXv_gYM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
