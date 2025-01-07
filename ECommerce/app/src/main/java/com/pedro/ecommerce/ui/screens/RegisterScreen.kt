@@ -26,9 +26,10 @@ fun RegisterScreen(
     navController: NavController,
     authViewModel: AuthViewModel
 ) {
-    // Variáveis para armazenar email e senha
+    // Variáveis para armazenar email, senha e nome
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var userName by remember { mutableStateOf("") } // Adicionado para armazenar o nome
 
     // Observa mensagens de erro
     val errorMessage by authViewModel.errorMessage.collectAsState()
@@ -39,6 +40,15 @@ fun RegisterScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.Center
     ) {
+        // Campo para inserir nome
+        TextField(
+            value = userName,
+            onValueChange = { userName = it },
+            label = { Text("Nome") }
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         // Campo para inserir email
         TextField(
             value = email,
@@ -60,7 +70,7 @@ fun RegisterScreen(
 
         // Botão de registo
         Button(onClick = {
-            authViewModel.register(email, password)
+            authViewModel.registerUser(email, password, userName) // Passa o userName
             // Voltar ao login após registar
             navController.navigate("login") {
                 popUpTo("register") { inclusive = true }

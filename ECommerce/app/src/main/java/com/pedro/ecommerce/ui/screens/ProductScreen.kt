@@ -1,11 +1,11 @@
 package com.pedro.ecommerce.ui.screens
 
+import com.pedro.ecommerce.viewmodel.cart.CartViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -15,24 +15,45 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.pedro.ecommerce.data.model.Product
 
 @Composable
-fun ProductScreen(products: List<Product>) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(products.size) { index ->
-            val product = products[index]
-            ProductItem(product = product)
+fun ProductScreen(
+    products: List<Product>,
+    cartViewModel: CartViewModel,
+    navController: NavController // Adiciona o NavController como parâmetro
+) {
+    Column {
+        // Botão para avançar para o Carrinho
+        Button(
+            onClick = { navController.navigate("cart") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Text(text = "Ir para o Carrinho")
+        }
+
+        // Lista de produtos
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(products.size) { index ->
+                val product = products[index]
+                ProductItem(
+                    product = product,
+                    onAddToCart = { cartViewModel.addToCart(product) }
+                )
+            }
         }
     }
 }
 
 @Composable
-fun ProductItem(product: Product) {
+fun ProductItem(product: Product, onAddToCart: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -85,7 +106,7 @@ fun ProductItem(product: Product) {
 
         // Botão na parte inferior do Card
         Button(
-            onClick = { /* Adicionar lógica de adicionar ao carrinho */ },
+            onClick = { onAddToCart() },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)

@@ -11,7 +11,8 @@ class ProductRepository {
         val products = mutableListOf<Product>()
         val result = db.collection("products").get().await()
         for (document in result.documents) {
-            val product = document.toObject(Product::class.java)
+            // Converte o documento para o objeto Product e inclui o id do documento
+            val product = document.toObject(Product::class.java)?.copy(id = document.id)
             if (product != null) {
                 products.add(product)
             }

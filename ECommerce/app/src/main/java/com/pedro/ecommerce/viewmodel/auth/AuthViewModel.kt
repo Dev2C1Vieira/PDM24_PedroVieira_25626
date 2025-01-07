@@ -1,5 +1,6 @@
 package com.pedro.ecommerce.viewmodel.auth
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
@@ -44,16 +45,29 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
      * @param email Email do utilizador.
      * @param password Senha do utilizador.
      */
-    fun register(email: String, password: String) {
+    fun registerUser(email: String, password: String, userName: String) {
         viewModelScope.launch {
-            authRepository.register(email, password) { user, error ->
+            authRepository.registerUser(
+                email = email,
+                password = password,
+                userName = userName
+            ) { user, error ->
                 if (user != null) {
-                    _authState.value = user // Atualiza o estado com o utilizador registado
+                    // Sucesso no registo
+                    Log.d("Auth", "Utilizador registado com sucesso: ${user.uid}")
                 } else {
-                    _errorMessage.value = error // Atualiza o estado com a mensagem de erro
+                    // Falha no registo
+                    Log.e("Auth", "Erro ao registar utilizador: $error")
                 }
             }
         }
+    }
+
+    /**
+     * Retorna o id do utilizador logado
+     * */
+    fun getCurrentUser(): FirebaseUser? {
+        return authRepository.getCurrentUser()
     }
 
     /**
