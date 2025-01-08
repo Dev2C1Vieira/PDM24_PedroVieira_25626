@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -121,7 +121,6 @@ fun CartScreen(
     }
 }
 
-
 @Composable
 fun CartItemBox(
     cartItem: CartItem,
@@ -132,113 +131,93 @@ fun CartItemBox(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .height(250.dp), // Altura total ajustada
+            .padding(12.dp)
+            .height(250.dp), // Altura ajustada para melhor espaçamento
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.elevatedCardElevation(6.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            // Primeira Row: Textos e Imagem
+            // Título e Imagem
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.8f), // Ocupa 80% da altura
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .padding(bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Textos
                 Column(
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(0.5f)
+                        .weight(1f)
                         .padding(8.dp),
-                    verticalArrangement = Arrangement.SpaceEvenly
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
                         text = cartItem.product.name,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
+                    Text("Preço Unitário: €${"%.2f".format(cartItem.product.price)}")
+                    Text("Quantidade: ${cartItem.quantity}")
                     Text(
-                        text = "Preço Unitário: €${"%.2f".format(cartItem.product.price)}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = "Quantidade: ${cartItem.quantity}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = "Total: €${"%.2f".format(cartItem.totalPrice)}",
-                        style = MaterialTheme.typography.bodyMedium,
+                        "Total: €${"%.2f".format(cartItem.totalPrice)}",
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
 
-                // Imagem
+                // Imagem aumentada
                 Image(
                     painter = rememberAsyncImagePainter(cartItem.product.imageUrl),
                     contentDescription = null,
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(0.5f) // Ocupa 50% da largura
-                        .padding(8.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .size(120.dp) // Imagem aumentada
+                        .clip(RoundedCornerShape(12.dp))
                 )
             }
 
-            // Segunda Row: Botões
+            // Botões de Quantidade e Remover
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.2f) // Ocupa 20% da altura
                     .padding(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Botões de adicionar/diminuir
+                // Botões de quantidade centralizados e visíveis
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Botão de aumentar quantidade
                     Button(
                         onClick = onIncreaseQuantity,
-                        modifier = Modifier.size(50.dp), // Define o tamanho do botão
-                        shape = RoundedCornerShape(12.dp), // Bordas arredondadas
-                        contentPadding = PaddingValues(0.dp) // Remove padding adicional
+                        modifier = Modifier.size(50.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(0.dp) // Remove padding extra
                     ) {
-                        Text(
-                            text = "+",
-                            fontSize = 20.sp, // Define o tamanho do texto
-                            textAlign = TextAlign.Center, // Centraliza o texto
-                            modifier = Modifier.fillMaxSize() // Garante que o texto ocupe o espaço do botão
-                        )
+                        Text("+", fontSize = 20.sp, textAlign = TextAlign.Center)
                     }
-                    // Botão de diminuir quantidade
+
                     Button(
                         onClick = onDecreaseQuantity,
-                        modifier = Modifier.size(50.dp), // Define o tamanho do botão
-                        shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(0.dp) // Remove padding adicional
+                        modifier = Modifier.size(50.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text(
-                            text = "-",
-                            fontSize = 20.sp, // Define o tamanho do texto
-                            textAlign = TextAlign.Center, // Centraliza o texto
-                            modifier = Modifier.fillMaxSize() // Garante que o texto ocupe o espaço do botão
-                        )
+                        Text("-", fontSize = 20.sp, textAlign = TextAlign.Center)
                     }
                 }
-                // Botão remover
+
+                // Botão Remover ajustado e centralizado
                 Button(
                     onClick = onRemove,
                     modifier = Modifier
-                        .defaultMinSize(minWidth = 160.dp) // Largura mínima ajustada
+                        .defaultMinSize(minWidth = 120.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Remover")
+                    Text("Remover", fontSize = 16.sp)
                 }
             }
         }

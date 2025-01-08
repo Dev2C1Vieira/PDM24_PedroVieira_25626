@@ -14,13 +14,20 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
     val productState: StateFlow<List<Product>> = _productState
 
     init {
-        fetchProducts()
+        viewModelScope.launch {
+            repository.fetchProducts()
+                .collect { products ->
+                    _productState.value = products
+                }
+        }
     }
 
-    private fun fetchProducts() {
+    fun fetchProducts() {
         viewModelScope.launch {
-            val products = repository.fetchProducts()
-            _productState.value = products
+            repository.fetchProducts()
+                .collect { products ->  // Collect para recolher o fluxo corretamente
+                    _productState.value = products
+                }
         }
     }
 }

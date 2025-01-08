@@ -45,44 +45,41 @@ class AuthRepository {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-                    user?.let {
-                        // Adiciona o utilizador à coleção 'users'
+                    user?.let { firebaseUser ->
+                        val userId = firebaseUser.uid  // Usa o UID do Firebase Authentication diretamente
+
+                        // Cria o documento do utilizador no Firestore usando o UID como ID do documento
                         val userData = mapOf(
-                            "id" to it.uid,
                             "name" to userName,
                             "email" to email
                         )
 
-                        firestore.collection("users").document(it.uid)
+                        firestore.collection("users").document(userId)
                             .set(userData)
                             .addOnSuccessListener {
-                                // Cria um documento inicial na coleção 'carts' para o utilizador
+                                // Cria um documento inicial na coleção 'carts' com o mesmo UID
                                 val cartData = mapOf(
-                                    "userId" to user.uid,
+                                    "userId" to userId,
                                     "items" to emptyList<Map<String, Any>>(),
                                     "totalPrice" to 0.0
                                 )
 
-                                firestore.collection("carts").document(user.uid)
+                                firestore.collection("carts").document(userId)
                                     .set(cartData)
                                     .addOnSuccessListener {
-                                        // Sucesso ao criar utilizador e carrinho
-                                        onResult(user, null)
+                                        onResult(user, null) // Sucesso total
                                     }
                                     .addOnFailureListener { error ->
-                                        // Falha ao criar o carrinho
                                         onResult(null, "Erro ao criar carrinho: ${error.message}")
                                     }
                             }
                             .addOnFailureListener { error ->
-                                // Falha ao criar o utilizador na coleção 'users'
                                 onResult(null, "Erro ao criar utilizador na base de dados: ${error.message}")
                             }
                     } ?: run {
                         onResult(null, "Erro ao obter utilizador após registo.")
                     }
                 } else {
-                    // Retorna a mensagem de erro caso algo falhe
                     onResult(null, task.exception?.message)
                 }
             }

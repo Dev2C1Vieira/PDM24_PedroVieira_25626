@@ -79,6 +79,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
             }
         }
 
+
         Spacer(modifier = Modifier.height(16.dp))
 
         // Link para registar

@@ -1,5 +1,6 @@
 package com.pedro.ecommerce.ui.screens
 
+import android.util.Log
 import com.pedro.ecommerce.viewmodel.cart.CartViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -17,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.google.firebase.auth.FirebaseAuth
 import com.pedro.ecommerce.data.model.Product
 
 @Composable
@@ -25,6 +27,10 @@ fun ProductScreen(
     cartViewModel: CartViewModel,
     navController: NavController // Adiciona o NavController como parâmetro
 ) {
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val userId = currentUser?.uid ?: ""
+    Log.d("UserID", "User ID: $userId")
+
     Column {
         // Botão para avançar para o Carrinho
         Button(
@@ -45,7 +51,7 @@ fun ProductScreen(
                 val product = products[index]
                 ProductItem(
                     product = product,
-                    onAddToCart = { cartViewModel.addToCart(product) }
+                    onAddToCart = { cartViewModel.addToCart(userId, product) }
                 )
             }
         }
