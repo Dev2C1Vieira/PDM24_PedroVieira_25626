@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.Filter
 
 class CartViewModel : ViewModel() {
     private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
@@ -23,50 +24,82 @@ class CartViewModel : ViewModel() {
 
     fun addToCart(userId: String, product: Product) {
         val firestore = FirebaseFirestore.getInstance()
-        val cartRef = firestore.collection("carts").document(userId)
 
-        cartRef.get().addOnSuccessListener { document ->
-            val currentCartItems = _cartItems.value.toMutableList()
-            val existingItemIndex = currentCartItems.indexOfFirst { it.product.id == product.id }
+        // Procurar a coleção onde o userId OU sharedWith contém o uid do user logado
+        firestore.collection("carts")
+            .where(Filter.or(
+                Filter.equalTo("userId", userId),
+                Filter.arrayContains("sharedWith", userId)
+            ))
+            .get()
+            .addOnSuccessListener { documents ->
+                if (!documents.isEmpty) {
+                    // Atualizar o carrinho encontrado
+                    for (document in documents) {
+                        val cartRef = firestore.collection("carts").document(document.id)
+                        cartRef.get().addOnSuccessListener { cartDoc ->
+                            val currentCartItems = _cartItems.value.toMutableList()
+                            val existingItemIndex = currentCartItems.indexOfFirst { it.product.id == product.id }
 
-            if (existingItemIndex != -1) {
-                // Se o produto já existe, atualiza a quantidade e o preço
-                val updatedItem = currentCartItems[existingItemIndex].copy(
-                    quantity = currentCartItems[existingItemIndex].quantity + 1
-                )
-                currentCartItems[existingItemIndex] = updatedItem
-            } else {
-                // Se o produto não existe, adiciona um novo item
-                currentCartItems.add(CartItem(product, quantity = 1))
-            }
+                            if (existingItemIndex != -1) {
+                                // Se o produto já existe, aumenta a quantidade
+                                val updatedItem = currentCartItems[existingItemIndex].copy(
+                                    quantity = currentCartItems[existingItemIndex].quantity + 1
+                                )
+                                currentCartItems[existingItemIndex] = updatedItem
+                            } else {
+                                // Se não existe, adiciona um novo item
+                                currentCartItems.add(CartItem(product, quantity = 1))
+                            }
 
-            _cartItems.value = currentCartItems
+                            _cartItems.value = currentCartItems
 
-            // Atualizar Firestore
-            val firestoreCartItems = currentCartItems.map {
-                FirestoreCartItem(
-                    productId = it.product.id,
-                    quantity = it.quantity,
-                    totalPrice = it.totalPrice
-                )
-            }
+                            // Atualizar Firestore
+                            val firestoreCartItems = currentCartItems.map {
+                                FirestoreCartItem(
+                                    productId = it.product.id,
+                                    quantity = it.quantity,
+                                    totalPrice = it.totalPrice
+                                )
+                            }
+                            val totalCartPrice = currentCartItems.sumOf { it.totalPrice }
 
-            val totalCartPrice = currentCartItems.sumOf { it.totalPrice }
+                            val updatedCart = FirestoreCart(
+                                userId = userId,
+                                items = firestoreCartItems,
+                                totalPrice = totalCartPrice
+                            )
 
-            val updatedCart = FirestoreCart(
-                userId = userId,
-                items = firestoreCartItems,
-                totalPrice = totalCartPrice
-            )
+                            cartRef.set(updatedCart)
+                                .addOnSuccessListener {
+                                    println("Carrinho atualizado com sucesso!")
+                                }
+                                .addOnFailureListener { e ->
+                                    println("Erro ao atualizar o carrinho: ${e.message}")
+                                }
+                        }
+                    }
+                } else {
+                    // Se nenhum carrinho encontrado, cria um novo
+                    val cartRef = firestore.collection("carts").document(userId)
+                    val newCart = FirestoreCart(
+                        userId = userId,
+                        items = listOf(FirestoreCartItem(product.id, 1, product.price)),
+                        totalPrice = product.price
+                    )
 
-            cartRef.set(updatedCart)
-                .addOnSuccessListener {
-                    println("Carrinho atualizado com sucesso!")
+                    cartRef.set(newCart)
+                        .addOnSuccessListener {
+                            println("Novo carrinho criado com sucesso!")
+                        }
+                        .addOnFailureListener { e ->
+                            println("Erro ao criar o carrinho: ${e.message}")
+                        }
                 }
-                .addOnFailureListener { e ->
-                    println("Erro ao atualizar carrinho: ${e.message}")
-                }
-        }
+            }
+            .addOnFailureListener { e ->
+                println("Erro ao procurar carrinho: ${e.message}")
+            }
     }
 
     fun removeFromCart(product: Product) {
@@ -108,16 +141,25 @@ class CartViewModel : ViewModel() {
      */
     fun loadCart(userId: String) {
         val firestore = FirebaseFirestore.getInstance()
-        firestore.collection("carts").document(userId)
+
+        firestore.collection("carts")
+            .where(
+                Filter.or(
+                    Filter.equalTo("userId", userId),
+                    Filter.arrayContains("sharedWith", userId)
+                )
+            )
             .get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
+            .addOnSuccessListener { documents ->
+                if (!documents.isEmpty) {
+                    val document = documents.documents.first()  // Obtém o primeiro carrinho encontrado
                     val firestoreCart = document.toObject(FirestoreCart::class.java)
-                    firestoreCart?.let {
-                        val cartItems = it.items.map { cartItem ->
+
+                    firestoreCart?.let { cart ->
+                        val cartItems = cart.items.map { cartItem ->
                             CartItem(
                                 product = Product(
-                                    id = cartItem.productId,  // Garantir que o ID é mantido
+                                    id = cartItem.productId,
                                     name = "",
                                     price = 0.0,
                                     imageUrl = ""
@@ -128,12 +170,17 @@ class CartViewModel : ViewModel() {
                         _cartItems.value = cartItems
                         loadProductDetails(cartItems)
                     }
+                } else {
+                    println("Nenhum carrinho encontrado para este utilizador.")
+                    _cartItems.value = emptyList()
                 }
             }
             .addOnFailureListener { e ->
                 println("Erro ao carregar o carrinho: ${e.message}")
+                _cartItems.value = emptyList()
             }
     }
+
 
     /**
      * Busca detalhes dos produtos no Firestore, preservando o productId.
@@ -171,26 +218,56 @@ class CartViewModel : ViewModel() {
 
         val firestoreCartItems = _cartItems.value.map { cartItem ->
             FirestoreCartItem(
-                productId = cartItem.product.id.ifBlank { "UNKNOWN_ID" },  // Evitar strings vazias
+                productId = cartItem.product.id.ifBlank { "UNKNOWN_ID" },
                 quantity = cartItem.quantity,
                 totalPrice = cartItem.totalPrice
             )
         }
 
-        val firestoreCart = FirestoreCart(
-            id = userId,
-            userId = userId,
-            items = firestoreCartItems,
-            totalPrice = _cartItems.value.sumOf { it.totalPrice }
-        )
-
-        firestore.collection("carts").document(userId)
-            .set(firestoreCart)
-            .addOnSuccessListener {
-                println("Carrinho salvo com sucesso!")
+        // Procurar o carrinho onde o userId ou sharedWith contém o UID do user logado
+        firestore.collection("carts")
+            .where(Filter.or(
+                Filter.equalTo("userId", userId),
+                Filter.arrayContains("sharedWith", userId)
+            ))
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    // Se não encontrar, cria um novo carrinho e define o userId
+                    firestore.collection("carts").document(userId)
+                        .set(FirestoreCart(
+                            userId = userId, // Mantém o userId do próprio utilizador, pois está a criar um novo
+                            items = firestoreCartItems,
+                            totalPrice = _cartItems.value.sumOf { it.totalPrice }
+                        ))
+                        .addOnSuccessListener {
+                            println("Novo carrinho criado com sucesso!")
+                        }
+                        .addOnFailureListener { e ->
+                            println("Erro ao criar novo carrinho: ${e.message}")
+                        }
+                } else {
+                    // Se encontrar, atualiza o carrinho existente sem modificar o userId
+                    for (document in documents) {
+                        val originalUserId = document.getString("userId") ?: userId
+                        firestore.collection("carts").document(document.id)
+                            .set(FirestoreCart(
+                                userId = originalUserId,  // Mantém o userId original encontrado
+                                items = firestoreCartItems,
+                                totalPrice = _cartItems.value.sumOf { it.totalPrice },
+                                sharedWith = document.get("sharedWith") as? List<String> ?: emptyList()
+                            ))
+                            .addOnSuccessListener {
+                                println("Carrinho atualizado com sucesso!")
+                            }
+                            .addOnFailureListener { e ->
+                                println("Erro ao atualizar o carrinho: ${e.message}")
+                            }
+                    }
+                }
             }
             .addOnFailureListener { e ->
-                println("Erro ao salvar o carrinho: ${e.message}")
+                println("Erro ao procurar carrinho: ${e.message}")
             }
     }
 }

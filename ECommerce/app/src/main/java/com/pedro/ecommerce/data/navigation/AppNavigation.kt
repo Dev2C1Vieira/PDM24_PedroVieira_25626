@@ -55,7 +55,8 @@ fun AppNavigation() {
             ProductScreen(
                 products = products,
                 cartViewModel = cartViewModel,
-                navController = navController // Passa o NavController
+                navController = navController,
+                authViewModel = authViewModel
             )
         }
         // Tela de Carrinho

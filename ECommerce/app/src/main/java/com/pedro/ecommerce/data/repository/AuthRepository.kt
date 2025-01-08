@@ -1,5 +1,6 @@
 package com.pedro.ecommerce.data.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
@@ -88,8 +89,13 @@ class AuthRepository {
     /**
      * Faz logout do utilizador atualmente autenticado.
      */
-    fun logout() {
-        auth.signOut()
+    fun logout():Boolean {
+        try{
+            auth.signOut()
+            return true
+        }catch(e:Exception){
+            return false
+        }
     }
 
     /**

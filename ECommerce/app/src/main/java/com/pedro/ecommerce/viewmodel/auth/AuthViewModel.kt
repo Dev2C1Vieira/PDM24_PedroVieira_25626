@@ -73,8 +73,12 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     /**
      * Faz logout do utilizador.
      */
-    fun logout() {
-        authRepository.logout()
-        _authState.value = null // Limpa o estado de autenticação
+    fun logout():Boolean {
+        try{
+            authRepository.logout()
+            return true
+        }catch(e:Exception){
+            return false
+        }
     }
 }

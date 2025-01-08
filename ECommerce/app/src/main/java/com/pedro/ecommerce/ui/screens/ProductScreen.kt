@@ -20,18 +20,33 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
 import com.pedro.ecommerce.data.model.Product
+import com.pedro.ecommerce.viewmodel.auth.AuthViewModel
 
 @Composable
 fun ProductScreen(
     products: List<Product>,
     cartViewModel: CartViewModel,
-    navController: NavController // Adiciona o NavController como parâmetro
+    navController: NavController,   // Adiciona o NavController como parâmetro
+    authViewModel: AuthViewModel    // Adiciona o AuthViewModel como parâmetro
 ) {
     val currentUser = FirebaseAuth.getInstance().currentUser
     val userId = currentUser?.uid ?: ""
     Log.d("UserID", "User ID: $userId")
 
     Column {
+
+        // Botão de Logout com chamada ao AuthViewModel
+        Button(
+            onClick = {
+                authViewModel.logout()
+                navController.navigate("login") {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+        ) {
+            Text("Logout")
+        }
+
         // Botão para avançar para o Carrinho
         Button(
             onClick = { navController.navigate("cart") },
